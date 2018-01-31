@@ -114,3 +114,6 @@ Return
 ^+#<!l::SendInput, ^+!{Right}
 ^+#<!u::SendInput, ^+!{Home}
 ^+#<!o::SendInput, ^+!{End}
+
+; LAlt + BackSpace = Delete
+<!BackSpace::SendInput, {Delete}
