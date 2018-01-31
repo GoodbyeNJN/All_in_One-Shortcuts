@@ -20,7 +20,7 @@ Return
 #If
 
 ; Ctrl + ESC = 发送Alt + F4
-^Esc::SnedKey("!{F4}")
+^Esc::SendKey("!{F4}")
 
 #If, GetKeyState("ScrollLock", "T")
 ; ScrollLock打开时，jkluio键输入数字
