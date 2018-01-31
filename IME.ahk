@@ -23,12 +23,9 @@ Switch_IME(wParam, lParam) {
 	global iniClass, iniExe, iniSpecial
 	WinGetclass, ClassName, ahk_id %lParam%
 	WinGet, ExeName, ProcessName, ahk_id %lParam%
-	If (InStr(iniSpecial, ExeName)) ;Or (InStr(iniSpecial, ClassName))
-		IMELayout_Set(0x4090409, , ExeName)
-	Else If (InStr(iniExe, ExeName)) ;And (InStr(iniExe, ClassName))
-		IME_Set(0, , ExeName)
-	Else If (InStr(iniClass, ClassName))
-		If (wParam = 1) ;消息号wParam = 1即为新建了一个窗口
+	If (ExeName != "" And InStr(iniExe, ExeName)) { ;And (InStr(iniExe, ClassName))
+		IME_Set(0, lParam)
+	} Else If (ClassName != "" And InStr(iniClass, ClassName) And wParam = 1) { ;消息号wParam = 1即为新建了一个窗口
 		/*
 			1				WINDOW_CREATED
 			2				WINDOWD_ESTROYED
@@ -51,27 +48,16 @@ Switch_IME(wParam, lParam) {
 			其中除后四个，其余见"ShellProc callback function (Windows)"
 			后四个见"RegisterShellHookWindow function (Windows)"
 		*/
-			IME_Set(0, lParam)
-}
-
-IMELayout_Set(SetLayout, WinID=0, WinExe=0) { ; 键盘布局，0x4090409 英文，0x8040804 中文
-	If (WinID = 0)
-		ControlGet, WinID, HWND, , , ahk_exe %WinExe%
-	If (WinExist("ahk_id" . WinID)) Or (WinExist("ahk_exe" . WinExe)) {
-		PtrSize := !A_PtrSize ? 4 : A_PtrSize
-		VarSetCapacity(StGTI, CbSize := (PtrSize*6)+24, 0)
-		NumPut(CbSize, StGTI,  0, "UInt")	; DWORD   cbSize
-		WinID := DllCall("GetGUIThreadInfo", "UInt", 0, "UInt", &StGTI)
-				? NumGet(StGTI, 8+PtrSize, "UInt") : WinID
+		Loop {
+			If (IME_Get(lParam) = 1 And IME_GetConvMode(lParam) = 1025) {
+				IME_Set(0, lParam)
+				Break
+			}
+		} Until (IME_Get(lParam) = 0 And IME_GetConvMode(lParam) = 1025)
 	}
-	DllCall("SendMessage"
-		, UInt, DllCall("imm32\ImmGetDefaultIMEWnd", "UInt", WinID)
-		, UInt, 80
-		, UInt, 1
-		, UInt, DllCall("LoadKeyboardLayout", Str, SetLayout, UInt, 1))
 }
 
-IME_Get(WinID=0, WinExe=0) {
+IME_Get(WinID:=0, WinExe:=0) {
 	If (WinID = 0)
 		ControlGet, WinID, HWND, , , ahk_exe %WinExe%
 	If (WinExist("ahk_id" . WinID)) Or (WinExist("ahk_exe" . WinExe)) {
@@ -88,7 +74,7 @@ IME_Get(WinID=0, WinExe=0) {
 		,  "Int", 0)			; lParam  : 0
 }
 
-IME_Set(SetStatus, WinID=0, WinExe=0) {
+IME_Set(SetStatus, WinID:=0, WinExe:=0) {
 	If (WinID = 0)
 		ControlGet, WinID, HWND, , , ahk_exe %WinExe%
 	If (WinExist("ahk_id" . WinID)) Or (WinExist("ahk_exe" . WinExe)) {
@@ -105,7 +91,7 @@ IME_Set(SetStatus, WinID=0, WinExe=0) {
 		,  "Int", SetStatus)	; lParam  : 0 or 1
 }
 
-IME_GetConvMode(WinID=0, WinExe=0) {
+IME_GetConvMode(WinID:=0, WinExe:=0) {
 	If (WinID = 0)
 		ControlGet, WinID, HWND, , , ahk_exe %WinExe%
 	If (WinExist("ahk_id" . WinID)) Or (WinExist("ahk_exe" . WinExe)) {
@@ -122,7 +108,7 @@ IME_GetConvMode(WinID=0, WinExe=0) {
 		,  "Int", 0)			; lParam  : 0
 }
 
-IME_SetConvMode(ConvStatus, WinID=0, WinExe=0) {
+IME_SetConvMode(ConvStatus, WinID:=0, WinExe:=0) {
 	If (WinID = 0)
 		ControlGet, WinID, HWND, , , ahk_exe %WinExe%
 	If (WinExist("ahk_id" . WinID)) Or (WinExist("ahk_exe" . WinExe)) {
