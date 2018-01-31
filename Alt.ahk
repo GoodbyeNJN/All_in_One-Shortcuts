@@ -30,7 +30,6 @@ Swtich_IME(NewState) { ; 切换输入法函数，-1为切换
 			, "UInt", 0x0283
 			,  "Int", 0x006
 			,  "Int", NewState)
-
 	}
 }
 
@@ -52,9 +51,66 @@ RAlt_2 := RAlt_1 := 0 ; 置空变量
 Return
 
 ; LAlt + ikjluo = 上下左右home end
-*<!i::SendInput, {Up}
-*<!k::SendInput, {Down}
-*<!j::SendInput, {Left}
-*<!l::SendInput, {Right}
-*<!u::SendInput, {Home}
-*<!o::SendInput, {End}
+; *<!i::SendInput, {Up}
+; *<!k::SendInput, {Down}
+; *<!j::SendInput, {Left}
+; *<!l::SendInput, {Right}
+; *<!u::SendInput, {Home}
+; *<!o::SendInput, {End}
+<!i::SendInput, {Up}
+<!k::SendInput, {Down}
+<!j::SendInput, {Left}
+<!l::SendInput, {Right}
+<!u::SendInput, {Home}
+<!o::SendInput, {End}
+
+; Ctrl/Shift/Win + LAlt + ikjluo = Ctrl/Shift/Alt + 上下左右home end
+^<!i::SendInput, ^{Up}
+^<!k::SendInput, ^{Down}
+^<!j::SendInput, ^{Left}
+^<!l::SendInput, ^{Right}
+^<!u::SendInput, ^{Home}
+^<!o::SendInput, ^{End}
+
++<!i::SendInput, +{Up}
++<!k::SendInput, +{Down}
++<!j::SendInput, +{Left}
++<!l::SendInput, +{Right}
++<!u::SendInput, +{Home}
++<!o::SendInput, +{End}
+
+#<!i::SendInput, !{Up}
+#<!k::SendInput, !{Down}
+#<!j::SendInput, !{Left}
+#<!l::SendInput, !{Right}
+#<!u::SendInput, !{Home}
+#<!o::SendInput, !{End}
+
+; Ctrl/Shift/Win组合键 + LAlt + ikjluo
+^+<!i::SendInput, ^+{Up}
+^+<!k::SendInput, ^+{Down}
+^+<!j::SendInput, ^+{Left}
+^+<!l::SendInput, ^+{Right}
+^+<!u::SendInput, ^+{Home}
+^+<!o::SendInput, ^+{End}
+
++#<!i::SendInput, +!{Up}
++#<!k::SendInput, +!{Down}
++#<!j::SendInput, +!{Left}
++#<!l::SendInput, +!{Right}
++#<!u::SendInput, +!{Home}
++#<!o::SendInput, +!{End}
+
+#^<!i::SendInput, !^{Up}
+#^<!k::SendInput, !^{Down}
+#^<!j::SendInput, !^{Left}
+#^<!l::SendInput, !^{Right}
+#^<!u::SendInput, !^{Home}
+#^<!o::SendInput, !^{End}
+
+^+#<!i::SendInput, ^+!{Up}
+^+#<!k::SendInput, ^+!{Down}
+^+#<!j::SendInput, ^+!{Left}
+^+#<!l::SendInput, ^+!{Right}
+^+#<!u::SendInput, ^+!{Home}
+^+#<!o::SendInput, ^+!{End}
