@@ -53,6 +53,7 @@ Switch_IME(wParam, lParam) {
 				IME_Set(0, lParam)
 				Break
 			}
+			Sleep, 50
 		} Until (IME_Get(lParam) = 0 And IME_GetConvMode(lParam) = 1025)
 	}
 }
