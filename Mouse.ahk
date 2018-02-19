@@ -28,8 +28,8 @@ If MousePos(1919, 0) {
 	SendInput, {Volume_Up}
 } Else If MousePos(-1, 1079) {
 	SendInput, ^#{Left}
-} Else If WinActive("ahk_class Chrome_WidgetWin_1") And ChromeMousePos() {
-	SendInput, ^{PgUp}
+; } Else If WinActive("ahk_class Chrome_WidgetWin_1") And ChromeMousePos() {
+; 	SendInput, ^{PgUp}
 } Else {
 	SendInput, {WheelUp}
 }
@@ -40,8 +40,8 @@ If MousePos(1919, 0) {
 	SendInput, {Volume_Down}
 } Else If MousePos(-1, 1079) {
 	SendInput, ^#{Right}
-} Else If WinActive("ahk_class Chrome_WidgetWin_1") And ChromeMousePos() {
-	SendInput, ^{PgDn}
+; } Else If WinActive("ahk_class Chrome_WidgetWin_1") And ChromeMousePos() {
+; 	SendInput, ^{PgDn}
 } Else {
 	SendInput, {WheelDown}
 }
@@ -52,14 +52,15 @@ Return
 If MousePos(-1, 1079) {
 	SendInput, #{Tab}
 }
+Return
 
 ; 在chrome标签栏区域按下右键发送中键
-#IfWinActive, ahk_class Chrome_WidgetWin_1
-~RButton::
-If ChromeMousePos()
-	SendInput, {MButton}
-Return
-#If
+; #IfWinActive, ahk_class Chrome_WidgetWin_1
+; ~RButton::
+; If ChromeMousePos()
+; 	SendInput, {MButton}
+; Return
+; #If
 
 ; 在屏幕右边缘按下前进键发送Ctrl + Alt +z
 XButton2::
