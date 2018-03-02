@@ -1,4 +1,7 @@
-﻿; chrome中调用迅雷下载链接
+﻿;------------------------------------------------------------
+; Ctrl段开始
+;------------------------------------------------------------
+; chrome中调用迅雷下载链接
 #IfWinActive, ahk_class Chrome_WidgetWin_1
 ^d::
 Run, C:\Program Files (x86)\Thunder Network\MiniThunder\Bin\ThunderMini.exe
@@ -22,16 +25,9 @@ Return
 ; Ctrl + ESC = 发送Alt + F4
 ^Esc::SendKey("!{F4}")
 
-#If, GetKeyState("ScrollLock", "T")
-; ScrollLock打开时，jkluio键输入数字
-j::SendInput, 1
-k::SendInput, 2
-l::SendInput, 3
-u::SendInput, 4
-i::SendInput, 5
-o::SendInput, 6
-#If
-
 #c::SendInput, #{F9} ; Win + c = ditto
 #t::WinSet, AlwaysOnTop, Toggle, A ; Win + t = 当前窗口置顶
 #f::Run, C:\Program Files\Everything\Everything.exe ; Win + f = everything
+;------------------------------------------------------------
+; Ctrl段结束
+;------------------------------------------------------------
