@@ -54,10 +54,10 @@ Return
 
 AppsKey Up::
 AppsKeyIsDown := 0
-AppsKeyAnotherKeyIsInput := 0
 Input, InputKey, T0.01 ; 终止函数中还在等待输入的Input
 If !AppsKeyAnotherKeyIsInput ; 没有其他按键输入
     Swtich_IME(-1)
+AppsKeyAnotherKeyIsInput := 0
 Return
 ;------------------------------------------------------------
 ; Win段结束
