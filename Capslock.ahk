@@ -14,7 +14,7 @@ KeyWait, CapsLock
 If !CapsLockAnotherKeyIsInput ; 按下了CapsLock键，且中途没有按下其他按键
 	SetCapsLockState, % GetKeyState("CapsLock", "T")
 						? "Off" : "On" ; 切换CapsLock状态
-CapsLockIsDown := 1
+CapsLockIsDown := 0
 CapsLockAnotherKeyIsInput := 0
 Return
 
