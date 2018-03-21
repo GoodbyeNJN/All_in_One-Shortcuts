@@ -26,10 +26,10 @@ BottomEdgePos := ScreenBorderPosBottom - 1 ; 鼠标在屏幕底边缘的y坐标
 ; 载入子模块
 #Include, IME.ahk
 #Include, Mouse.ahk
-#Include, Alt.ahk
+#Include, LAlt.ahk
+#Include, RAlt.ahk
 #Include, Ctrl and balabala.ahk
 #Include, Capslock.ahk
-#Include, Win.ahk
 
 ; 调试用：sublime text窗口激活时，F1运行帮助文档，F2重载脚本
 #IfWinActive, ahk_class PX_WINDOW_CLASS
