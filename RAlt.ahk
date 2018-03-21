@@ -13,8 +13,7 @@ DetectAltKey() { ; 检测按键函数
 SendStr(InputStr) { ; 发送原样字符函数
     global AltAnotherKeyIsInput
     AltAnotherKeyIsInput := 1 ; 置空变量，防止执行If下的语句
-    InputStr := Format("{U+{1:#x}}", Ord(InputStr))
-    SendInput, %InputStr%
+    SendInput, % Format("{U+{1:#x}}", Ord(InputStr))
 }
 
 Swtich_IME(NewState) { ; 切换输入法函数，-1为切换
