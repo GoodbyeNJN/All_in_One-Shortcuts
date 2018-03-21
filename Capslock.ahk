@@ -27,13 +27,13 @@ Return
 	; CapsLock + d = 最小化本窗口
 	d::
 	WinMinimize, A
-	CapsLockAnotherKeyIsInput := 0
+	CapsLockAnotherKeyIsInput := 1
 	Return
 
 	; CapsLock + r = 任务管理器
 	r::
 	Run, taskmgr
-	CapsLockAnotherKeyIsInput := 0
+	CapsLockAnotherKeyIsInput := 1
 	Return
 }
 #If
