@@ -8,17 +8,15 @@ SendKey(Key) {
 }
 
 CapsLock::
-CapsLockIsDown := 1
 CapsLockAnotherKeyIsInput := 0
 KeyWait, CapsLock
 If !CapsLockAnotherKeyIsInput ; 按下了CapsLock键，且中途没有按下其他按键
 	SetCapsLockState, % GetKeyState("CapsLock", "T")
 						? "Off" : "On" ; 切换CapsLock状态
-CapsLockIsDown := 0
 CapsLockAnotherKeyIsInput := 0
 Return
 
-#If CapsLockIsDown ; 正处于按下CapsLock键的状态时触发
+#If GetKeyState("CapsLock", "P") ; 正处于按下CapsLock键的状态时触发
 {
 	w::SendKey("!{F4}") ; CapsLock + w = 发送Alt + F4
 	c::SendKey("#1") ; CapsLock + c = chrome
