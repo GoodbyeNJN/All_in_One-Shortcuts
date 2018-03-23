@@ -25,7 +25,6 @@ Return
 ; Ctrl + ESC = 发送Alt + F4
 ^Esc::SendKey("!{F4}")
 
-#c::SendInput, #{F9} ; Win + c = ditto
 #t::WinSet, AlwaysOnTop, Toggle, A ; Win + t = 当前窗口置顶
 #f::Run, C:\Program Files\Everything\Everything.exe ; Win + f = everything
 ;------------------------------------------------------------
