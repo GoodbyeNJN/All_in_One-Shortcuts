@@ -29,55 +29,35 @@ MousePos(X, Y) { ; 判断当前鼠标相对于屏幕的坐标是否匹配传入�
 		}
 	}
 */
-; 滚轮在屏幕右上角滚动调节音量，在屏幕下边缘切换虚拟桌面 ; 在chrome标签栏区域切换标签
-WheelUp::
-If MousePos(RightEdgePos, 0) {
-	SendInput, {Volume_Up}
-} Else If MousePos(-1, BottomEdgePos) {
-	SendInput, ^#{Left}
-; } Else If WinActive("ahk_class Chrome_WidgetWin_1") And ChromeMousePos() {
-; 	SendInput, ^{PgUp}
-} Else {
-	SendInput, {WheelUp}
-}
-Return
+; 滚轮在屏幕右上角滚动调节音量
+#If MousePos(RightEdgePos, 0)
+WheelUp::SendInput, {Volume_Up}
+WheelDown::SendInput, {Volume_Down}
+#If
 
-WheelDown::
-If MousePos(RightEdgePos, 0) {
-	SendInput, {Volume_Down}
-} Else If MousePos(-1, BottomEdgePos) {
-	SendInput, ^#{Right}
-; } Else If WinActive("ahk_class Chrome_WidgetWin_1") And ChromeMousePos() {
-; 	SendInput, ^{PgDn}
-} Else {
-	SendInput, {WheelDown}
-}
-Return
+; 滚轮在屏幕下边缘切换虚拟桌面
+#If MousePos(-1, BottomEdgePos)
+WheelUp::SendInput, ^#{Left}
+WheelDown::SendInput, ^#{Right}
+#If
 
 ; 在屏幕下边缘按下滚轮调出虚拟桌面管理
-~MButton::
-If MousePos(-1, BottomEdgePos) {
-	SendInput, #{Tab}
-}
-Return
-/*
-	; 在chrome标签栏区域按下右键发送中键
-	#IfWinActive, ahk_class Chrome_WidgetWin_1
-	~RButton::
-	If ChromeMousePos()
-		SendInput, {MButton}
-	Return
-	#If
-*/
+#If MousePos(-1, BottomEdgePos)
+MButton::SendInput, #{Tab}
+#If
+
 ; 在屏幕右边缘按下前进键发送Ctrl + Alt +z
-XButton2::
-If MousePos(RightEdgePos, -1) {
-	SendInput, ^!z
-} Else {
-	SendInput, {XButton2}
-}
-Return
+#If MousePos(RightEdgePos, -1)
+XButton2::SendInput, ^!z
+#If
 /*
+	; 在chrome标签栏区域滚轮切换标签，按下右键发送中键
+	#If WinActive("ahk_class Chrome_WidgetWin_1") And ChromeMousePos()
+	WheelUp::SendInput, ^{PgUp}
+	WheelDown::SendInput, ^{PgDn}
+	RButton::SendInput, {MButton}
+	#If
+
 	; 按下后退键临时降低鼠标速度
 	XButton1::
 	SPI_GETMOUSESPEED := 0x70, SPI_SETMOUSESPEED := 0x71
