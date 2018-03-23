@@ -2,10 +2,11 @@
 ; RAlt段开始
 ;------------------------------------------------------------
 DetectAltKey() { ; 检测按键函数
-    global AltIsDown
-    Input, InputKey, L1 ; 检测单个按键输入并保存到InputKey变量中
-    If !AltIsDown
+    If !GetKeyState("RAlt", "P")
         Return
+    Input, InputKey, IL1 ; 检测单个按键输入并保存到InputKey变量中
+    If (ErrorLevel = "NewInput")
+        DetectAltKey()
     SendStr(InputKey)
     DetectAltKey() ; 递归调用自身
 }
@@ -43,18 +44,26 @@ Swtich_IME(NewState) { ; 切换输入法函数，-1为切换
 }
 
 *RAlt::
-AltIsDown := 1
 AltAnotherKeyIsInput := 0
+SendInput, {RAlt Up}
 DetectAltKey()
 Return
 
 RAlt Up::
-AltIsDown := 0 ; 置空变量
-Input, InputKey, T0.01 ; 终止函数中还在等待输入的Input
+Input ; 终止函数中还在等待输入的Input
 If !AltAnotherKeyIsInput ; 表示按下了RAlt键，且中途没有按下其他按键
     Swtich_IME(-1) ; 切换输入法
 AltAnotherKeyIsInput := 0
 Return
+
+#If GetKeyState("RAlt", "P")
+; Intellij IDEA窗口激活时，RAlt + Enter = Ctrl + Shift + Enter
+Enter::
+Input ; 终止函数中还在等待输入的Input
+SendInput, +{Enter}
+AltAnotherKeyIsInput := 1
+Return
+#If
 ;------------------------------------------------------------
 ; RAlt段结束
 ;------------------------------------------------------------
