@@ -46,9 +46,10 @@ WheelDown::SendInput, ^#{Right}
 MButton::SendInput, #{Tab}
 #If
 
-; 在屏幕右边缘按下前进键发送Ctrl + Alt +z
+; 在屏幕右边缘按下前进键发送Ctrl + Alt +z，后退键发送Ctrl + Alt +w
 #If MousePos(RightEdgePos, -1)
 XButton2::SendInput, ^!z
+XButton1::SendInput, ^!w
 #If
 /*
 	; 在chrome标签栏区域滚轮切换标签，按下右键发送中键
