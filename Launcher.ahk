@@ -28,7 +28,8 @@ BottomEdgePos := ScreenBorderPosBottom - 1 ; 鼠标在屏幕底边缘的y坐标
 #Include, Mouse.ahk
 #Include, LAlt.ahk
 #Include, RAlt.ahk
-#Include, Ctrl and balabala.ahk
+#Include, Ctrl.ahk
+#Include, Win.ahk
 #Include, Capslock.ahk
 
 ; 调试用：sublime text窗口激活时，F1运行帮助文档，F2重载脚本
