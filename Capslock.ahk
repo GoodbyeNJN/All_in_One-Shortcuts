@@ -95,6 +95,12 @@ Return
 	#^j::ModSendInput("^#{Left}")
 	#^l::ModSendInput("^#{Right}")
 
+	; CapsLock + BackSpace = Delete
+	BackSpace::ModSendInput("{Delete}")
+
+	; CapsLock + esc = 发送 Alt + F4
+	Esc::ModSendInput("!{F4}")
+
 	w::ModSendInput("!{F4}") ; CapsLock + w = 发送Alt + F4
 	c::ModSendInput("#1") ; CapsLock + c = chrome
 	e::ModSendInput("#2") ; CapsLock + e = 文件浏览器
@@ -110,9 +116,6 @@ Return
 	Run, taskmgr
 	CapsHotKeyIsInput := 1
 	Return
-
-	; CapsLock + esc = 发送 Alt + F4
-	Esc::SendInput, !{F4}
 }
 #If
 ;------------------------------------------------------------
