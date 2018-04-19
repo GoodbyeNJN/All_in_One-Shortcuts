@@ -1,38 +1,118 @@
 ;------------------------------------------------------------
 ; Capslock段开始
 ;------------------------------------------------------------
-SendKey(Key) {
-	global CapsLockAnotherKeyIsInput
-	SendInput, %Key%
-	CapsLockAnotherKeyIsInput := 1 ; 置空变量，防止执行If下的语句
+ModSendInput(InputKey) {
+    global CapsHotKeyIsInput
+    SendInput, % InputKey
+    CapsHotKeyIsInput := 1
 }
 
-CapsLock::
-CapsLockAnotherKeyIsInput := 0
-KeyWait, CapsLock
-If !CapsLockAnotherKeyIsInput ; 按下了CapsLock键，且中途没有按下其他按键
-	SetCapsLockState, % GetKeyState("CapsLock", "T")
-						? "Off" : "On" ; 切换CapsLock状态
-CapsLockAnotherKeyIsInput := 0
+*CapsLock::
+CapsAnotherKeyIsInput := 0
+CapsHotKeyIsInput := 0
+SendInput, {CapsLock Up}
+; DetectCapsKey()
 Return
 
-#If GetKeyState("CapsLock", "P") ; 正处于按下CapsLock键的状态时触发
+CapsLock Up::
+Input
+If (!CapsAnotherKeyIsInput) And (!CapsHotKeyIsInput)
+    SetCapsLockState, % GetKeyState("CapsLock", "T") ? "Off" : "On"
+CapsAnotherKeyIsInput := 0
+CapsHotKeyIsInput := 0
+Return
+
+#If GetKeyState("CapsLock", "P")
 {
-	w::SendKey("!{F4}") ; CapsLock + w = 发送Alt + F4
-	c::SendKey("#1") ; CapsLock + c = chrome
-	e::SendKey("#2") ; CapsLock + e = 文件浏览器
+	; CapsLock + ikjluo = 上下左右home end
+	i::ModSendInput("{Up}")
+	k::ModSendInput("{Down}")
+	j::ModSendInput("{Left}")
+	l::ModSendInput("{Right}")
+	u::ModSendInput("{Home}")
+	o::ModSendInput("{End}")
+
+	; Ctrl/Shift/Alt + CapsLock + ikjluo = Ctrl/Shift/Alt + 上下左右home end
+	^i::ModSendInput("^{Up}")
+	^k::ModSendInput("^{Down}")
+	^j::ModSendInput("^{Left}")
+	^l::ModSendInput("^{Right}")
+	^u::ModSendInput("^{Home}")
+	^o::ModSendInput("^{End}")
+
+	+i::ModSendInput("+{Up}")
+	+k::ModSendInput("+{Down}")
+	+j::ModSendInput("+{Left}")
+	+l::ModSendInput("+{Right}")
+	+u::ModSendInput("+{Home}")
+	+o::ModSendInput("+{End}")
+
+	!i::ModSendInput("!{Up}")
+	!k::ModSendInput("!{Down}")
+	!j::ModSendInput("!{Left}")
+	!l::ModSendInput("!{Right}")
+	!u::ModSendInput("!{Home}")
+	!o::ModSendInput("!{End}")
+
+	; Ctrl/Shift/Alt组合键 + CapsLock + ikjluo
+	^+i::ModSendInput("^+{Up}")
+	^+k::ModSendInput("^+{Down}")
+	^+j::ModSendInput("^+{Left}")
+	^+l::ModSendInput("^+{Right}")
+	^+u::ModSendInput("^+{Home}")
+	^+o::ModSendInput("^+{End}")
+
+	+!i::ModSendInput("+!{Up}")
+	+!k::ModSendInput("+!{Down}")
+	+!j::ModSendInput("+!{Left}")
+	+!l::ModSendInput("+!{Right}")
+	+!u::ModSendInput("+!{Home}")
+	+!o::ModSendInput("+!{End}")
+
+	!^i::ModSendInput("!^{Up}")
+	!^k::ModSendInput("!^{Down}")
+	!^j::ModSendInput("!^{Left}")
+	!^l::ModSendInput("!^{Right}")
+	!^u::ModSendInput("!^{Home}")
+	!^o::ModSendInput("!^{End}")
+
+	^+!i::ModSendInput("^+!{Up}")
+	^+!k::ModSendInput("^+!{Down}")
+	^+!j::ModSendInput("^+!{Left}")
+	^+!l::ModSendInput("^+!{Right}")
+	^+!u::ModSendInput("^+!{Home}")
+	^+!o::ModSendInput("^+!{End}")
+
+	; Win + CapsLock + ikjluo = Win + 上下左右
+	#i::ModSendInput("#{Up}")
+	#k::ModSendInput("#{Down}")
+	#j::ModSendInput("#{Left}")
+	#l::ModSendInput("#{Right}")
+	#u::ModSendInput("#{Home}")
+	#o::ModSendInput("#{End}")
+
+	; Ctrl + Win + CapsLock + jl = Ctrl + Win + 左右
+	#^j::ModSendInput("^#{Left}")
+	#^l::ModSendInput("^#{Right}")
+
+	w::ModSendInput("!{F4}") ; CapsLock + w = 发送Alt + F4
+	c::ModSendInput("#1") ; CapsLock + c = chrome
+	e::ModSendInput("#2") ; CapsLock + e = 文件浏览器
 
 	; CapsLock + d = 最小化本窗口
 	d::
 	WinMinimize, A
-	CapsLockAnotherKeyIsInput := 1
+	CapsHotKeyIsInput := 1
 	Return
 
 	; CapsLock + r = 任务管理器
 	r::
 	Run, taskmgr
-	CapsLockAnotherKeyIsInput := 1
+	CapsHotKeyIsInput := 1
 	Return
+
+	; CapsLock + esc = 发送 Alt + F4
+	Esc::SendInput, !{F4}
 }
 #If
 ;------------------------------------------------------------
