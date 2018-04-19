@@ -26,7 +26,7 @@ BottomEdgePos := ScreenBorderPosBottom - 1 ; 鼠标在屏幕底边缘的y坐标
 ; 载入子模块
 #Include, IME.ahk
 #Include, Mouse.ahk
-#Include, LAlt.ahk
+; #Include, LAlt.ahk
 #Include, RAlt.ahk
 #Include, Ctrl.ahk
 #Include, Win.ahk
