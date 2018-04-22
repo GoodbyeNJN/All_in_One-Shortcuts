@@ -21,6 +21,9 @@ ControlSetText, Edit1, "%Clipboard%"%A_space%
 Send, {End}
 Return
 #If
+
+; Ctrl + esc = 发送 Alt + F4
+^Esc::SendInput, !{F4}
 ;------------------------------------------------------------
 ; Ctrl段结束
 ;------------------------------------------------------------
