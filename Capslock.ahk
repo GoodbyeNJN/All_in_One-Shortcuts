@@ -98,9 +98,6 @@ Return
 	; CapsLock + BackSpace = Delete
 	BackSpace::ModSendInput("{Delete}")
 
-	; CapsLock + esc = 发送 Alt + F4
-	Esc::ModSendInput("!{F4}")
-
 	w::ModSendInput("!{F4}") ; CapsLock + w = 发送Alt + F4
 	c::ModSendInput("#1") ; CapsLock + c = chrome
 	e::ModSendInput("#2") ; CapsLock + e = 文件浏览器
