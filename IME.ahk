@@ -4,7 +4,7 @@
 ; 读取配置文件中需要更改输入法的窗口名
 IniRead, iniClass, config.ini, IME, ClassName
 IniRead, iniExe, config.ini, IME, ExeName
-IniRead, iniSpecial, config.ini, IME, SpecialName
+IniRead, iniTitle, config.ini, IME, TitleName
 
 Gui, +LastFound
 HWND := WinExist()
@@ -28,7 +28,9 @@ Switch_IME(wParam, lParam) { ; 处理窗口事件的函数，参数由系统传�
     WinGet, ExeName, ProcessName, ahk_id %lParam%
     If (ExeName != "" And InStr(iniExe, ExeName)) { ;And (InStr(iniExe, ClassName)) ; 判断获取的进程信息是否在配置文件中
         IME_Set(0, lParam)
-    } Else If (ClassName != "" And InStr(iniClass, ClassName) And wParam = 1) { ; 消息号wParam = 1即为新建了一个窗口
+    } Else If (ClassName != "" And InStr(iniClass, ClassName) And wParam = 1)
+            ; Or (TitleName != "" And InStr(iniTitle, TitleName))
+    { ; 消息号wParam = 1即为新建了一个窗口
         /*
             1               WINDOW_CREATED
             2               WINDOWD_ESTROYED
