@@ -5,6 +5,8 @@
 IniRead, iniClass, config.ini, IME, ClassName
 IniRead, iniExe, config.ini, IME, ExeName
 IniRead, iniTitle, config.ini, IME, TitleName
+IniRead, iniSpecialClass, config.ini, IME, SpecialClassName
+IniRead, iniSpecialExe, config.ini, IME, SpecialExeName
 
 Gui, +LastFound
 HWND := WinExist()
@@ -26,11 +28,15 @@ Switch_IME(wParam, lParam) { ; 处理窗口事件的函数，参数由系统传�
     global iniClass, iniExe, iniSpecial
     WinGetclass, ClassName, ahk_id %lParam%
     WinGet, ExeName, ProcessName, ahk_id %lParam%
-    If (ExeName != "" And InStr(iniExe, ExeName)) { ;And (InStr(iniExe, ClassName)) ; 判断获取的进程信息是否在配置文件中
-        IME_Set(0, lParam)
-    } Else If (ClassName != "" And InStr(iniClass, ClassName) And wParam = 1)
-            ; Or (TitleName != "" And InStr(iniTitle, TitleName))
-    { ; 消息号wParam = 1即为新建了一个窗口
+    ; If (ExeName != "" And InStr(iniExe, ExeName)) { ;And (InStr(iniExe, ClassName))
+    ; 判断获取的进程信息是否在配置文件中
+    ;     IME_Set(0, lParam)
+    ; } Else If (ClassName != "" And InStr(iniClass, ClassName) And wParam = 1)
+    ;         Or (TitleName != "" And InStr(iniTitle, TitleName))
+    If (ExeName != "" And InStr(iniExe, ExeName)) { ; 判断获取的进程信息是否在配置文件中
+        Forced_IME_Set(0, lParam, , 5)
+    } Else If (ClassName != "" And InStr(iniClass, ClassName) And wParam = 1) {
+        ; 消息号wParam = 1即为新建了一个窗口
         /*
             1               WINDOW_CREATED
             2               WINDOWD_ESTROYED
@@ -53,14 +59,46 @@ Switch_IME(wParam, lParam) { ; 处理窗口事件的函数，参数由系统传�
             其中除后四个，其余见"ShellProc callback function (Windows)"
             后四个见"RegisterShellHookWindow function (Windows)"
         */
-        ; 由于程序加载过程需要一定时间，或者加载完但并未处于前台，此处在5、20、60、180秒内一直尝试设置输入法状态
-        If ((IME_Set(0, lParam, 5) = 0)
-            Or (IME_Set(0, lParam, , 20) = 0)
-            Or (IME_Set(0, lParam, , 60) = 0)
-            Or (IME_Set(0, lParam, , 180) = 0)) {
-            ; 若上一步尝试设置输入法失败，此处判断窗口是否存在，若存在，则在1800秒内再次尝试设置输入法状态
-            If (WinExist("ahk_id" . lParam))
-                IME_Set(0, lParam, 1800)
+        /*
+            此方法被已被弃用
+            ; 由于程序加载过程需要一定时间，或者加载完但并未处于前台，此处在5、20、60、180秒内一直尝试设置输入法状态
+            ; If ((IME_Set(0, lParam, 5) = 0)
+            ;     Or (IME_Set(0, lParam, , 20) = 0)
+            ;     Or (IME_Set(0, lParam, , 60) = 0)
+            ;     Or (IME_Set(0, lParam, , 180) = 0)) {
+            ;     ; 若上一步尝试设置输入法失败，此处判断窗口是否存在，若存在，则在1800秒内再次尝试设置输入法状态
+            ;     If (WinExist("ahk_id" . lParam))
+            ;         IME_Set(0, lParam, 1800)
+            ; }
+        */
+        Forced_IME_Set(0, lParam, , 5)
+    }
+}
+
+; 强行设置输入法
+; SetStatus:        0 --> 关闭输入法
+;                   1 --> 开启输入法
+; WinID/WinExe:     窗口名称，不带ahk_***
+; WaitingTime:       尝试设置输入法状态的有效时间，默认3秒
+; 返回值:            在有效时间内未设置成功则返回1，成功返回0
+Forced_IME_Set(SetStatus, WinID:=0, WinExe:=0, WaitingTime:=3) {
+    StartTime := A_TickCount
+    IME_Set(SetStatus, WinID, WinExe)
+    IME_Status := IME_Get(WinID, WinExe)
+    IME_ConvStatus := IME_GetConvMode(WinID, WinExe)
+    If (SetStatus = 0) {
+        While, !(IME_Status = 0 And IME_ConvStatus = 1024) {
+            If (A_TickCount - StartTime > WaitingTime * 1000)
+                Break
+            IME_Set(SetStatus, WinID, WinExe)
+            IME_Status := IME_Get(WinID, WinExe)
+            IME_ConvStatus := IME_GetConvMode(WinID, WinExe)
+        }
+    } Else If (SetStatus = 1) {
+        While, !(IME_Get(WinID, WinExe) = 1 And IME_GetConvMode(WinID, WinExe) = 1025) {
+            If (A_TickCount - StartTime > WaitingTime * 1000)
+                Break
+            IME_Set(SetStatus, WinID, WinExe)
         }
     }
 }
@@ -69,12 +107,12 @@ Switch_IME(wParam, lParam) { ; 处理窗口事件的函数，参数由系统传�
 ; SetStatus:        0 --> 关闭输入法
 ;                   1 --> 开启输入法
 ; WinID/WinExe:     窗口名称，不带ahk_***
-; WaitngTime:       尝试设置输入法状态的有效时间，默认3秒
+; WaitingTime:       尝试设置输入法状态的有效时间，默认3秒
 ; 返回值:            在有效时间内未设置成功则返回1，成功返回0
-IME_Set(SetStatus, WinID:=0, WinExe:=0, WaitngTime:=3) {
+IME_Set(SetStatus, WinID:=0, WinExe:=0, WaitingTime:=3) {
     If (WinID = 0)
         ControlGet, WinID, HWND, , , ahk_exe %WinExe%
-    WinWaitActive, ahk_id %WinID%, , WaitngTime
+    WinWaitActive, ahk_id %WinID%, , WaitingTime
     IfEqual, ErrorLevel, 1, Return, ErrorLevel ; WinWaitActive超时后ErrorLevel为1
     ; 判断系统为64位或32位
     PtrSize := !A_PtrSize ? 4 : A_PtrSize
@@ -88,58 +126,57 @@ IME_Set(SetStatus, WinID:=0, WinExe:=0, WaitngTime:=3) {
         ,  "Int", 0x006         ; wParam  : IMC_SETOPENSTATUS
         ,  "Int", SetStatus)    ; lParam  : 0 or 1
 }
-/*
-    IME_Get(WinID:=0, WinExe:=0) {
-        If (WinID = 0)
-            ControlGet, WinID, HWND, , , ahk_exe %WinExe%
-        If (WinExist("ahk_id" . WinID)) Or (WinExist("ahk_exe" . WinExe)) {
-            PtrSize := !A_PtrSize ? 4 : A_PtrSize
-            VarSetCapacity(StGTI, CbSize := (PtrSize*6)+24, 0)
-            NumPut(CbSize, StGTI,  0, "UInt")   ; DWORD   cbSize
-            WinID := DllCall("GetGUIThreadInfo", "UInt", 0, "UInt", &StGTI)
-                    ? NumGet(StGTI, 8+PtrSize, "UInt") : WinID
-        }
-        Return DllCall("SendMessage"
-            , "UInt", DllCall("imm32\ImmGetDefaultIMEWnd", "UInt", WinID)
-            , "UInt", 0x0283        ; Message : WM_IME_CONTROL
-            ,  "Int", 0x005         ; wParam  : IMC_GETOPENSTATUS
-            ,  "Int", 0)            ; lParam  : 0
-    }
 
-    IME_GetConvMode(WinID:=0, WinExe:=0) {
-        If (WinID = 0)
-            ControlGet, WinID, HWND, , , ahk_exe %WinExe%
-        If (WinExist("ahk_id" . WinID)) Or (WinExist("ahk_exe" . WinExe)) {
-            PtrSize := !A_PtrSize ? 4 : A_PtrSize
-            VarSetCapacity(StGTI, CbSize := (PtrSize*6)+24, 0)
-            NumPut(CbSize, StGTI,  0, "UInt")   ; DWORD   cbSize
-            WinID := DllCall("GetGUIThreadInfo", "UInt", 0, "UInt", &StGTI)
-                    ? NumGet(StGTI, 8+PtrSize, "UInt") : WinID
-        }
-        Return DllCall("SendMessage"
-            , "UInt", DllCall("imm32\ImmGetDefaultIMEWnd", "UInt", WinID)
-            , "UInt", 0x0283        ; Message : WM_IME_CONTROL
-            ,  "Int", 0x001         ; wParam  : IMC_GETCONVERSIONMODE
-            ,  "Int", 0)            ; lParam  : 0
+IME_Get(WinID:=0, WinExe:=0) {
+    If (WinID = 0)
+        ControlGet, WinID, HWND, , , ahk_exe %WinExe%
+    If (WinExist("ahk_id" . WinID)) Or (WinExist("ahk_exe" . WinExe)) {
+        PtrSize := !A_PtrSize ? 4 : A_PtrSize
+        VarSetCapacity(StGTI, CbSize := (PtrSize*6)+24, 0)
+        NumPut(CbSize, StGTI,  0, "UInt")   ; DWORD   cbSize
+        WinID := DllCall("GetGUIThreadInfo", "UInt", 0, "UInt", &StGTI)
+                ? NumGet(StGTI, 8+PtrSize, "UInt") : WinID
     }
+    Return DllCall("SendMessage"
+        , "UInt", DllCall("imm32\ImmGetDefaultIMEWnd", "UInt", WinID)
+        , "UInt", 0x0283        ; Message : WM_IME_CONTROL
+        ,  "Int", 0x005         ; wParam  : IMC_GETOPENSTATUS
+        ,  "Int", 0)            ; lParam  : 0
+}
 
-    IME_SetConvMode(ConvStatus, WinID:=0, WinExe:=0) {
-        If (WinID = 0)
-            ControlGet, WinID, HWND, , , ahk_exe %WinExe%
-        If (WinExist("ahk_id" . WinID)) Or (WinExist("ahk_exe" . WinExe)) {
-            PtrSize := !A_PtrSize ? 4 : A_PtrSize
-            VarSetCapacity(StGTI, CbSize := (PtrSize*6)+24, 0)
-            NumPut(CbSize, StGTI,  0, "UInt")   ; DWORD   cbSize
-            WinID := DllCall("GetGUIThreadInfo", "UInt", 0, "UInt", &StGTI)
-                    ? NumGet(StGTI, 8+PtrSize, "UInt") : WinID
-        }
-        Return DllCall("SendMessage"
-            , UInt, DllCall("imm32\ImmGetDefaultIMEWnd", "UInt", WinID)
-            , UInt, 0x0283          ; Message : WM_IME_CONTROL
-            ,  Int, 0x002           ; wParam  : IMC_SETCONVERSIONMODE
-            ,  Int, ConvStatus)     ; lParam  : CONVERSIONMODE
+IME_GetConvMode(WinID:=0, WinExe:=0) {
+    If (WinID = 0)
+        ControlGet, WinID, HWND, , , ahk_exe %WinExe%
+    If (WinExist("ahk_id" . WinID)) Or (WinExist("ahk_exe" . WinExe)) {
+        PtrSize := !A_PtrSize ? 4 : A_PtrSize
+        VarSetCapacity(StGTI, CbSize := (PtrSize*6)+24, 0)
+        NumPut(CbSize, StGTI,  0, "UInt")   ; DWORD   cbSize
+        WinID := DllCall("GetGUIThreadInfo", "UInt", 0, "UInt", &StGTI)
+                ? NumGet(StGTI, 8+PtrSize, "UInt") : WinID
     }
-*/
+    Return DllCall("SendMessage"
+        , "UInt", DllCall("imm32\ImmGetDefaultIMEWnd", "UInt", WinID)
+        , "UInt", 0x0283        ; Message : WM_IME_CONTROL
+        ,  "Int", 0x001         ; wParam  : IMC_GETCONVERSIONMODE
+        ,  "Int", 0)            ; lParam  : 0
+}
+
+IME_SetConvMode(ConvStatus, WinID:=0, WinExe:=0) {
+    If (WinID = 0)
+        ControlGet, WinID, HWND, , , ahk_exe %WinExe%
+    If (WinExist("ahk_id" . WinID)) Or (WinExist("ahk_exe" . WinExe)) {
+        PtrSize := !A_PtrSize ? 4 : A_PtrSize
+        VarSetCapacity(StGTI, CbSize := (PtrSize*6)+24, 0)
+        NumPut(CbSize, StGTI,  0, "UInt")   ; DWORD   cbSize
+        WinID := DllCall("GetGUIThreadInfo", "UInt", 0, "UInt", &StGTI)
+                ? NumGet(StGTI, 8+PtrSize, "UInt") : WinID
+    }
+    Return DllCall("SendMessage"
+        , UInt, DllCall("imm32\ImmGetDefaultIMEWnd", "UInt", WinID)
+        , UInt, 0x0283          ; Message : WM_IME_CONTROL
+        ,  Int, 0x002           ; wParam  : IMC_SETCONVERSIONMODE
+        ,  Int, ConvStatus)     ; lParam  : CONVERSIONMODE
+}
 ;------------------------------------------------------------
 ; IME段结束
 ;------------------------------------------------------------
