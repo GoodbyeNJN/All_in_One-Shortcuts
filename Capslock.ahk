@@ -24,6 +24,7 @@ Return
 
 #If GetKeyState("CapsLock", "P")
 {
+/*
 	; CapsLock + ikjluo = 上下左右home end
 	i::ModSendInput("{Up}")
 	k::ModSendInput("{Down}")
@@ -97,8 +98,8 @@ Return
 
 	; CapsLock + BackSpace = Delete
 	BackSpace::ModSendInput("{Delete}")
-
-	w::ModSendInput("!{F4}") ; CapsLock + w = 发送Alt + F4
+*/
+  	w::ModSendInput("!{F4}") ; CapsLock + w = 发送Alt + F4
 	c::ModSendInput("#1") ; CapsLock + c = chrome
 	e::ModSendInput("#2") ; CapsLock + e = 文件浏览器
 
