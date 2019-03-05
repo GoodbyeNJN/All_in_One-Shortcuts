@@ -20,7 +20,7 @@ MousePos(X, Y) { ; 判断当前鼠标相对于屏幕的坐标是否匹配传入�
 	ChromeMousePos() { ; 判断鼠标位置是否在chrome标签栏区域
 		CoordMode, Mouse, Window
 		MouseGetPos, MouseX, MouseY ; 获取鼠标相对于chrome的坐标
-		WinGet, ChromeState, MinMax ; 获取鼠chrome最大化或窗口化状态
+		WinGet, ChromeState, MinMax ; 获取chrome最大化或窗口化状态
 		WinGetPos, , , ChromeWidth, , ahk_class Chrome_WidgetWin_1 ; 获取鼠chrome窗口的宽度
 		If (ChromeState = 1) {
 			Return, % (MouseY >= 8 And MouseY <= 36) ? "1" : "0"

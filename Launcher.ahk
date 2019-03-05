@@ -3,6 +3,7 @@
 ;------------------------------------------------------------
 #NoTrayIcon
 #SingleInstance force
+SetTitleMatchMode 2
 
 ; 检测是否以管理员身份运行
 If not A_IsAdmin {
@@ -27,10 +28,12 @@ BottomEdgePos := ScreenBorderPosBottom - 1 ; 鼠标在屏幕底边缘的y坐标
 #Include, IME.ahk
 #Include, Mouse.ahk
 ; #Include, LAlt.ahk
-#Include, RAlt.ahk
+; #Include, RAlt.ahk
+#Include, F14.ahk
 #Include, Ctrl.ahk
 #Include, Win.ahk
-#Include, Capslock.ahk
+; #Include, Capslock.ahk
+#Include, Other.ahk
 
 ; 调试用：sublime text窗口激活时，F1运行帮助文档，F2重载脚本
 #IfWinActive, ahk_class PX_WINDOW_CLASS

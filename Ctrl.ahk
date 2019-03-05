@@ -2,7 +2,7 @@
 ; Ctrl段开始
 ;------------------------------------------------------------
 ; chrome中调用迅雷下载链接
-#IfWinActive, ahk_class Chrome_WidgetWin_1
+#IfWinActive, Cent Browser ahk_class Chrome_WidgetWin_1
 ^d::
 Run, C:\Program Files (x86)\Thunder Network\MiniThunder\Bin\ThunderMini.exe
 WinWait, 迅雷精简版
