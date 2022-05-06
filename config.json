@@ -1,0 +1,89 @@
+{
+    "imeSwitch": {
+        "on": { "status": 1, "openStatus": 1, "convMode": 1025 },
+        "off": { "status": 0, "openStatus": 0, "convMode": 1024 }
+    },
+    "imeConfig": [
+        {
+            "processName": "Code.exe",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1,
+            "delay": [1000, 3000, 5000]
+        },
+        {
+            "processName": "WindowsTerminal.exe",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1
+        },
+        {
+            "processName": "sublime_text.exe",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1
+        },
+        {
+            "processName": "PowerShell.exe",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1
+        },
+        {
+            "processName": "Xshell.exe",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1
+        },
+        {
+            "processName": "Postman.exe",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1
+        },
+        {
+            "processName": "X2.EXE",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1
+        },
+        {
+            "processName": "i_view64.exe",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1
+        },
+        {
+            "processName": "Photoshop.exe",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1,
+            "delay": [5000, 10000, 15000]
+        },
+        {
+            "processName": "fx-570VN PLUS Emulator.exe",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1
+        },
+        {
+            "processName": "cmd.exe",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1
+        },
+        {
+            "processName": "scrcpy.exe",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1
+        },
+        {
+            "processName": "WindowsTerminal.exe",
+            "status": 0,
+            "onCreated": 1,
+            "onActivated": 1,
+            "delay": [1000, 3000, 5000]
+        }
+    ]
+}
