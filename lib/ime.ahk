@@ -6,7 +6,10 @@
  */
 
 getImeConfig(lParam) {
-    console.log("lParam:", lParam)
+    if (state.enableWindowChangeLog) {
+        console.log("lParam:", lParam)
+    }
+
     if (!lParam) {
         return
     }
@@ -18,10 +21,13 @@ getImeConfig(lParam) {
     if (winExe == "") {
         return
     }
-    console.log("winExe:", winExe)
+
+    if (state.enableWindowChangeLog) {
+        console.log("winExe:", winExe)
+    }
 
     local imeConfig := readConfig("imeConfig")
-    for (k, v in imeConfig) {
+    for (v in imeConfig) {
         if (v.processName == winExe) {
             return v
         }
@@ -29,9 +35,9 @@ getImeConfig(lParam) {
 }
 
 /**
- * 获取输入法默认的窗口句柄，0表示获取失败
+ * 获取窗口句柄，0表示获取失败
  */
-getDefaultImeWnd(lParam := 0) {
+getHwnd(lParam := 0) {
     /**
      * 获取当前输入焦点的窗口句柄，0表示获取失败
      */
@@ -58,11 +64,11 @@ getDefaultImeWnd(lParam := 0) {
          */
 
         local cbSize := 4 + 4 + (A_PtrSize * 6) + 4 * 4
-        local buff := Buffer(cbSize, 0)
+        local buff := Buffer(cbSize)
         NumPut("UInt", cbSize, buff, 0)
 
         ; https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getguithreadinfo
-        local isSuccess := DllCall("GetGUIThreadInfo", "UInt", 0, "Ptr", buff)
+        local isSuccess := DllCall("GetGUIThreadInfo", "UInt", 0, "Ptr", buff, "UInt")
         ; https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-guithreadinfo
         local hwndFocus := isSuccess ? NumGet(buff, 4 + 4 + A_PtrSize, "UInt") : 0
 
@@ -83,113 +89,59 @@ getDefaultImeWnd(lParam := 0) {
     }
 
     local hwndFocus := getKeyboardFocusHwnd()
-    console.log("hwndFocus:", hwndFocus)
     local hwndActive := getActiveHwnd()
-    console.log("hwndActive:", hwndActive)
-    local hwnd := lParam ? lParam : hwndActive ? hwndActive : hwndFocus
-    console.log("hwnd:", hwnd)
+    local hwnd := lParam ? lParam : hwndFocus ? hwndFocus : hwndActive
 
-    if (!WinActive("ahk_id " . hwnd)) {
-        console.log("WinActive:", hwnd)
-        return 0
+    if (state.enableWindowChangeLog) {
+        console.log("hwndFocus:", hwndFocus)
+        console.log("hwndActive:", hwndActive)
+        console.log("hwnd:", hwnd)
     }
 
-    ; https://docs.microsoft.com/en-us/windows/win32/api/imm/nf-imm-immgetdefaultimewnd
-    local imeWnd := DllCall("imm32\ImmGetDefaultIMEWnd", "UInt", hwnd)
 
-    return imeWnd
+    ; if (!WinActive("ahk_id " . hwnd)) {
+    ;     console.log("WinActive:", hwnd)
+    ;     return 0
+    ; }
+
+    return hwnd
 }
 
-getCurrentImeSwitch(imeWnd) {
-    /**
-     * 获取输入法开关
-     */
-    getImeStatus(imeWnd) {
-        return DllCall(
-            "SendMessage",
-            "UInt", imeWnd,
-            "UInt", WM_IME_CONTROL,
-            "Int", IMC_GETOPENSTATUS,
-            "Int", 0
-        )
+getCurrentImeSwitch(hwnd) {
+    local hex := state.imeSwitch.on
+
+    try {
+        local processId := DllCall("GetWindowThreadProcessId", "UInt", hwnd, "UInt", 0, "UInt")
+        local layout := DllCall("GetKeyboardLayout", "UInt", processId, "UInt")
+        hex := Format("0x{:x}", layout)
     }
 
-    /**
-     * 获取输入法转换状态
-     */
-    getImeConvMode(imeWnd) {
-        return DllCall(
-            "SendMessage",
-            "UInt", imeWnd,
-            "UInt", WM_IME_CONTROL,
-            "Int", IMC_GETCONVERSIONMODE,
-            "Int", 0
-        )
+    local imeSwitch := state.imeSwitch.on
+    if (hex == state.imeSwitch.on.layout) {
+        imeSwitch := state.imeSwitch.on
+    } else if (hex == state.imeSwitch.off.layout) {
+        imeSwitch := state.imeSwitch.off
     }
 
-    local imeOpenStatus := getImeStatus(imeWnd)
-    local imeConvMode := getImeConvMode(imeWnd)
-
-    local imeStatus := false
-    if (imeOpenStatus == state.imeSwitch.on.status && imeConvMode == state.imeSwitch.on.convMode) {
-        imeStatus := true
-    } else if (imeOpenStatus == state.imeSwitch.off.status && imeConvMode == state.imeSwitch.off.convMode) {
-        imeStatus := false
-    }
-
-    local currentImeSwitch := {
-        status: imeStatus,
-        openStatus: imeOpenStatus,
-        convMode: imeConvMode
-    }
-    console.log("currentImeSwitch:", currentImeSwitch)
-
-    return currentImeSwitch
+    return imeSwitch
 }
 
-getNextImeSwitch(imeWnd) {
-    local currentImeSwitch := getCurrentImeSwitch(imeWnd)
+getNextImeSwitch(hwnd) {
+    local currentImeSwitch := getCurrentImeSwitch(hwnd)
     local nextImeSwitch := currentImeSwitch.status ? state.imeSwitch.off : state.imeSwitch.on
-    console.log("nextImeSwitch:", nextImeSwitch)
 
     return nextImeSwitch
 }
 
-setImeSwitch(imeSwitch, imeWnd) {
-    /**
-     * 设置输入法开关
-     */
-    setImeStatus(status, imeWnd) {
-        return DllCall(
-            "SendMessage",
-            "UInt", imeWnd,
-            "UInt", WM_IME_CONTROL,
-            "Int", IMC_SETOPENSTATUS,
-            "Int", status
-        )
+setImeSwitch(imeSwitch, hwnd) {
+    try {
+        PostMessage(WM_INPUTLANGCHANGEREQUEST, , imeSwitch.layout, , "ahk_id " . hwnd)
     }
-
-    /**
-     * 设置输入法转换状态
-     */
-    setImeConvMode(status, imeWnd) {
-        return DllCall(
-            "SendMessage",
-            "UInt", imeWnd,
-            "UInt", WM_IME_CONTROL,
-            "Int", IMC_SETCONVERSIONMODE,
-            "Int", status
-        )
-    }
-
-    setImeStatus(imeSwitch.status, imeWnd)
-    setImeConvMode(imeSwitch.convMode, imeWnd)
 }
 
 toggleIme(lParam := 0, status := unset) {
-    local imeWnd := getDefaultImeWnd(lParam)
-    console.log("imeWnd:", imeWnd)
-    if (!imeWnd) {
+    local hwnd := getHwnd(lParam)
+    if (!hwnd) {
         return
     }
 
@@ -197,28 +149,9 @@ toggleIme(lParam := 0, status := unset) {
     if (IsSet(status)) {
         nextImeSwitch := status ? state.imeSwitch.on : state.imeSwitch.off
     } else {
-        nextImeSwitch := getNextImeSwitch(imeWnd)
+        nextImeSwitch := getNextImeSwitch(hwnd)
     }
 
-    setImeSwitch(nextImeSwitch, imeWnd)
-}
-
-setImeDelay(delay, lParam := 0, status := unset) {
-    static index := 1
-    fn() {
-        toggleIme(lParam, status)
-
-        index += 1
-        setImeDelay(delay, lParam, status)
-    }
-
-    if (!delay.Has(index)) {
-        index := 1
-        return
-    }
-
-    local currentDelay := delay[index]
-    console.log("currentDelay:", currentDelay)
-    ; SetTimer(toggleIme.Bind(lParam, status), 0 - currentDelay)
-    SetTimer(fn, 0 - currentDelay)
+    setImeSwitch(nextImeSwitch, hwnd)
+    setImeIcon(nextImeSwitch)
 }

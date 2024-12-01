@@ -4,7 +4,6 @@
 
 #HotIf ProcessExist("Code.exe")
 >^>+F1:: showConsoleWindow()
->^>+F2:: restart()
 >^>+F3:: state.isSelectWindow := !state.isSelectWindow
 #HotIf
 
@@ -24,6 +23,8 @@
         onCreated: true,
         onActivated: true
     })
-    writeConfig(imeConfig, "ime")
+    writeConfig(imeConfig, "imeConfig")
 }
 #HotIf
+
+>^>+F2:: Reload()

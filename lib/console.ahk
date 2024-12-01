@@ -61,43 +61,53 @@ class ConsoleWindow {
 
 class console {
     static _log(level := "info", params*) {
-            local string := ""
-            for (v in params) {
-                if (string != "") {
-                    string .= " "
-                }
-
-                string .= IsObject(v) ? JsonStringify(v, " ", 2) : v
+        local string := ""
+        for (v in params) {
+            if (string != "") {
+                string .= " "
             }
-            string .= "`n"
 
-            ; try {
-            ;     FileAppend(string, "*")
-            ; }
-
-            try {
-                state.window.update(string)
-            }
+            string .= IsObject(v) ? JsonStringify(v, " ", 2) : v
         }
+        string .= "`n"
+
+        ; try {
+        ;     FileAppend(string, "*")
+        ; }
+
+        try {
+            state.window.update(string)
+        }
+    }
 
     static log(params*) {
-            console._log("info", params*)
-        }
+        console._log("info", params*)
+    }
 
     static debug(params*) {
-            console._log("debug", params*)
-        }
+        console._log("debug", params*)
+    }
 
     static info(params*) {
-            console._log("info", params*)
-        }
+        console._log("info", params*)
+    }
 
     static warn(params*) {
-            console._log("warn", params*)
-        }
+        console._log("warn", params*)
+    }
 
     static error(params*) {
         console._log("error", params*)
+    }
+
+    static time(params*) {
+        ; local time := 0
+        ; DllCall("QueryPerformanceFrequency", "Int64*", 0)
+        ; DllCall("QueryPerformanceCounter", "Int64*", &time)
+
+        local time := A_TickCount
+
+        console._log("info", time, params*)
     }
 }
 

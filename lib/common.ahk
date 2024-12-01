@@ -1,28 +1,32 @@
 class Obj {
     static isFunction(value) {
-            return IsObject(value) && (value is Func)
-        }
+        return IsObject(value) && (value is Func)
+    }
 
     static isArray(value) {
-            return IsObject(value) && (value is Array)
-        }
+        return IsObject(value) && (value is Array)
+    }
 
     static isMap(value) {
-            return IsObject(value) && (value is Map)
-        }
+        return IsObject(value) && (value is Map)
+    }
 
     static isObject(value) {
-        return (
-            !Obj.isFunction(value) &&
-            !Obj.isArray(value) &&
-            !Obj.isMap(value) &&
-            IsObject(value)
-        )
+        return !Obj.isFunction(value) && !Obj.isArray(value) && !Obj.isMap(value) && IsObject(value)
     }
 }
 
 initState() {
     state.imeSwitch := readConfig("imeSwitch")
+    state.username := readEnv("username")
+    state.password := readEnv("password")
+}
+
+readEnv(key := unset) {
+    local string := FileRead(ENV_FILE_PATH)
+    local env := JsonParse(string)
+
+    return IsSet(key) ? env.%key% : env
 }
 
 readConfig(key := unset) {
@@ -58,31 +62,14 @@ isInDebugMode() {
     return false
 }
 
-runWithoutPrivilege(command, options := "") {
-    RunAs(state.username, state.password)
-    Run(command, , options)
-    RunAs()
-}
+runWithPrivilege() {
+    if (A_IsAdmin) {
+        return
+    }
 
-restart() {
-    initState()
-
-    ; if (isInDebugMode()) {
-    ;     restartInDebugMode(true)
-    ; } else {
-    restartWithPrivilege(true)
-    ; }
-
-    ExitApp()
-}
-
-restartWithPrivilege(force := false) {
-    if (!force) {
-        local hasRestartSwitch := RegExMatch(DllCall("GetCommandLine", "str"), " /restart(?!\S)")
-
-        if (hasRestartSwitch) {
-            return
-        }
+    local hasRestartSwitch := RegExMatch(DllCall("GetCommandLine", "Str"), " /restart(?!\S)")
+    if (hasRestartSwitch) {
+        return
     }
 
     local commandLine := getCommandLineString({ switches: ["restart"] })
@@ -90,19 +77,10 @@ restartWithPrivilege(force := false) {
     ExitApp()
 }
 
-restartInDebugMode(force := false) {
-    if (!force && isInDebugMode()) {
-        return
-    }
-
-    local params := A_Args.Clone()
-    params.Push("debug")
-    local ahkPath := StrReplace(A_AhkPath, " ", "`` ")
-
-    local commandLine := getCommandLineString({ ahkPath: ahkPath, params: params })
-    Run(Format('wt -w 0 nt -p "Windows PowerShell" PowerShell -Command {1} ^| Write-Host', commandLine))
-    ; Run(Format('wt -w _quake nt -p "Windows PowerShell" PowerShell -Command {1} ^| Write-Host', commandLine))
-    ExitApp()
+runWithoutPrivilege(command, options := "") {
+    RunAs(state.username, state.password)
+    Run(command, , options)
+    RunAs()
 }
 
 getSwitchesString(switches) {
@@ -148,8 +126,8 @@ getCommandLineString(args := unset) {
     local params := args.HasOwnProp("params") ? args.params : A_Args
 
     local commandLine := A_IsCompiled
-        ? Format('"{1}" {2} {3}', filename, getSwitchesString(switches), getParamsString(params))	; CompiledScript.exe [Switches] [Script Parameters]
-        : Format('"{1}" {2} "{3}" {4}', ahkPath, getSwitchesString(switches), filename, getParamsString(params))	; AutoHotkey.exe [Switches] [Script Filename] [Script Parameters]
+        ? Format('"{1}" {2} {3}', filename, getSwitchesString(switches), getParamsString(params))    ; CompiledScript.exe [Switches] [Script Parameters]
+        : Format('"{1}" {2} "{3}" {4}', ahkPath, getSwitchesString(switches), filename, getParamsString(params))    ; AutoHotkey.exe [Switches] [Script Filename] [Script Parameters]
 
     return commandLine
 }
@@ -169,64 +147,162 @@ getCurrentExplorerPath() {
 }
 
 winSize(w, h, params*) {
-    local x := 0
-    local y := 0
-    WinGetPos(&x, &y, , , params*)
+    local rect := getWindowRect(params*)
 
-    WinMove(x, y, w, h, params*)
+    WinMove(rect.x, rect.y, w, h, params*)
 }
 
-moveToCenter() {
-    local status := WinGetMinMax("A")
+moveToCenter(title := "A", monitorIndex := unset) {
+    local status := 1
+
+    try {
+        status := WinGetMinMax(title)
+    }
+
     if (status != 0) {
         return
     }
 
-    local w := 0
-    local h := 0
-    WinGetPos(, , &w, &h, "A")
+    local rect := getWindowRect(title)
+    local index := IsSet(monitorIndex) ? monitorIndex : Monitor.getIndexByWindow(title)
+    local border := Monitor.getWorkAreaRectByIndex(index)
 
-    local l := 0
-    local t := 0
-    local r := 0
-    local b := 0
-    MonitorGetWorkArea(getCurrentMonitorIndex(), &l, &t, &r, &b)
-
-    local x := (r + l - w) / 2
-    local y := (b + t - h) / 2
-    WinMove(x, y, , , "A")
+    local x := (border.r + border.l - rect.w) / 2
+    local y := (border.b + border.t - rect.h) / 2
+    WinMove(x, y, , , title)
 }
 
-getCurrentMonitorIndex() {
-    local count := MonitorGetCount()
+moveQuakeModeWindow(title := "A", w := unset, h := unset, monitorIndex := unset) {
+    try {
+        DetectHiddenWindows(true)
+
+        local status := 1
+        try {
+            status := WinGetMinMax(title)
+        }
+        if (status != 0) {
+            return
+        }
+
+        if (!IsSet(monitorIndex)) {
+            monitorIndex := Monitor.getIndexByPos(getMousePos())
+        }
+
+        local windowRect := getWindowRect(title)
+        local monitorRect := Monitor.getWorkAreaRectByIndex(monitorIndex)
+        if (!IsSet(w)) {
+            w := windowRect.w
+        } else if (Type(w) == "String" && SubStr(w, -1) == "%") {
+            w := StrReplace(w, "%", "") / 100 * monitorRect.w
+        }
+        if (!IsSet(h)) {
+            h := windowRect.h
+        } else if (Type(h) == "String" && SubStr(h, -1) == "%") {
+            h := StrReplace(h, "%", "") / 100 * monitorRect.h
+        }
+
+        local x := (monitorRect.r + monitorRect.l - w) / 2
+        local y := monitorRect.t
+        WinMove(x, y, w, h, title)
+    } finally {
+        DetectHiddenWindows(false)
+    }
+}
+
+getWindowRect(title := "A") {
     local x := 0
     local y := 0
     local w := 0
     local h := 0
-    WinGetPos(&x, &y, &w, &h, "A")
 
-    local monitorCoords := []
-    loop (count) {
+    try {
+        WinGetPos(&x, &y, &w, &h, title)
+    }
+
+    return { x: x, y: y, w: w, h: h }
+}
+
+getMousePos() {
+    local x := 0
+    local y := 0
+    CoordMode("Mouse", "Screen")
+    MouseGetPos(&x, &y)
+
+    return { x: x, y: y }
+}
+
+class Monitor {
+    static getCount() {
+        return MonitorGetCount()
+    }
+
+    static getIndexByPos(pos) {
+        local borders := []
+        loop Monitor.getCount() {
+            borders.Push(Monitor.getRectByIndex(A_Index))
+        }
+
+        for (i, v in borders) {
+            if (pos.x >= v.l && pos.x <= v.r && pos.y >= v.t && pos.y <= v.b) {
+                return i
+            }
+        }
+    }
+
+    static getIndexByWindow(title := "A") {
+        local rect := getWindowRect(title)
+        local borders := []
+        loop Monitor.getCount() {
+            borders.Push(Monitor.getRectByIndex(A_Index))
+        }
+
+        ; 先按窗口中心点的坐标确定在哪个显示器上
+        local centerX := rect.x + rect.w / 2
+        local centerY := rect.y + rect.h / 2
+        for (i, v in borders) {
+            if (centerX >= v.l && centerX <= v.r && centerY >= v.t && centerY <= v.b) {
+                return i
+            }
+        }
+        ; 再按窗口左上角点的坐标确定在哪个显示器上
+        for (i, v in borders) {
+            if (rect.x >= v.l && rect.x <= v.r && rect.y >= v.t && rect.y <= v.b) {
+                return i
+            }
+        }
+    }
+
+    static getRectByIndex(index) {
         local l := 0
         local t := 0
         local r := 0
         local b := 0
-        MonitorGet(A_Index, &l, &t, &r, &b)
-        monitorCoords.Push({ l: l, t: t, r: r, b: b })
+        MonitorGet(index, &l, &t, &r, &b)
+
+        local w := Abs(r - l)
+        local h := Abs(b - t)
+
+        return { l: l, t: t, r: r, b: b,
+            x: l, y: t, w: w, h: h }
     }
 
-    ; 先按窗口中心点的坐标确定在哪个显示器上
-    local centerX := x + w / 2
-    local centerY := y + h / 2
-    for (k, v in monitorCoords) {
-        if (centerX >= v.l && centerX <= v.r && centerY >= v.t && centerY <= v.b) {
-            return k
-        }
+    static getWorkAreaRectByIndex(index) {
+        local l := 0
+        local t := 0
+        local r := 0
+        local b := 0
+        MonitorGetWorkArea(index, &l, &t, &r, &b)
+
+        local w := Abs(r - l)
+        local h := Abs(b - t)
+
+        return { l: l, t: t, r: r, b: b,
+            x: l, y: t, w: w, h: h }
     }
-    ; 再按窗口左上角点的坐标确定在哪个显示器上
-    for (k, v in monitorCoords) {
-        if (x >= v.l && x <= v.r && y >= v.t && y <= v.b) {
-            return k
-        }
+
+    static getNameByIndex(index) {
+        local name := MonitorGetName(index)
+
+        return name
     }
 }
