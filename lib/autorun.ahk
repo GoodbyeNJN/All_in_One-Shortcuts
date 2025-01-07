@@ -3,7 +3,7 @@ onWindowCreated(wParam, lParam) {
         console.log("----------Created----------")
     }
 
-    setImeIcon(getCurrentImeSwitch(getHwnd(lParam)))
+    ; setImeIcon(getCurrentImeSwitch(getHwnd(lParam)))
 
     local imeConfig := getImeConfig(lParam)
     if (!imeConfig) {
@@ -20,7 +20,7 @@ onWindowActivated(wParam, lParam) {
         console.log("---------Activated---------")
     }
 
-    setImeIcon(getCurrentImeSwitch(getHwnd(lParam)))
+    ; setImeIcon(getCurrentImeSwitch(getHwnd(lParam)))
 
     local imeConfig := getImeConfig(lParam)
     if (!imeConfig) {
@@ -122,7 +122,7 @@ launchWezterm() {
 
 autorun() {
     listenWindowChange(onWindowChange)
-    TraySetIcon(IME_ON_ICON)
+    ; TraySetIcon(IME_ON_ICON)
     ; setImeIcon(getCurrentImeSwitch(getHwnd()))
     ; addToggleImeOption()
     launchWezterm()

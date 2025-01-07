@@ -153,5 +153,5 @@ toggleIme(lParam := 0, status := unset) {
     }
 
     setImeSwitch(nextImeSwitch, hwnd)
-    setImeIcon(nextImeSwitch)
+    ; setImeIcon(nextImeSwitch)
 }
