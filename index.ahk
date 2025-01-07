@@ -1,4 +1,4 @@
-#requires AutoHotkey v2.0-beta.6
+#requires AutoHotkey v2.0
 
 #SingleInstance Force
 #NoTrayIcon
@@ -6,6 +6,9 @@ SendMode("Input")
 SetWorkingDir(A_ScriptDir)
 SetTitleMatchMode(2)
 FileEncoding("UTF-8")
+
+A_HotkeyInterval := 100
+A_MaxHotkeysPerInterval := 30
 
 #DllLoad "imm32"
 
