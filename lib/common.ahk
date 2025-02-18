@@ -152,6 +152,42 @@ winSize(w, h, params*) {
     WinMove(rect.x, rect.y, w, h, params*)
 }
 
+goToDesktopNum(num) {
+    if (num < 1 || num > VD.getCount() || num == VD.getCurrentDesktopNum()) {
+        return
+    }
+
+    VD.goToDesktopNum(num)
+}
+
+goToRelativeDesktopNum(num) {
+    local current := VD.getCurrentDesktopNum()
+
+    if (num < 0) {
+        goToDesktopNum(current - 1)
+    } else if (num > 0) {
+        goToDesktopNum(current + 1)
+    }
+}
+
+moveToDesktopNum(title := "A", num := unset) {
+    if (!IsSet(num) || num < 1 || num > VD.getCount() || num == VD.getDesktopNumOfWindow(title)) {
+        return
+    }
+
+    VD.MoveWindowToDesktopNum(title, num)
+}
+
+moveToRelativeDesktopNum(title := "A", num := unset) {
+    local current := VD.getDesktopNumOfWindow(title)
+
+    if (num < 0) {
+        moveToDesktopNum(title, current - 1)
+    } else if (num > 0) {
+        moveToDesktopNum(title, current + 1)
+    }
+}
+
 moveToCenter(title := "A", monitorIndex := unset) {
     local status := 1
 

@@ -41,41 +41,7 @@ WheelDown::Volume_Down
 
 ; 在屏幕右边缘按下前进键发送Ctrl + Alt +z，后退键发送Ctrl + Alt +w
 #HotIf isMouseAtEdges(['r'])
-XButton2:: {
-    static title := "ahk_exe QQ.exe"
+XButton2:: Send("{F19}")
 
-    local isWindowShow := WinActive(title)
-
-    Send("{F19}")
-
-    if (isWindowShow || !WinWait(title)) {
-        return
-    }
-
-    local mouseIndex := Monitor.getIndexByPos(getMousePos())
-    local windowIndex := Monitor.getIndexByWindow(title)
-
-    if (mouseIndex != windowIndex) {
-        moveToCenter(title, mouseIndex)
-    }
-}
-
-XButton1:: {
-    static title := "ahk_class WeChatMainWndForPC"
-
-    local isWindowShow := WinActive(title)
-
-    Send("^{F19}")
-
-    if (isWindowShow || !WinWait(title)) {
-        return
-    }
-
-    local mouseIndex := Monitor.getIndexByPos(getMousePos())
-    local windowIndex := Monitor.getIndexByWindow(title)
-
-    if (mouseIndex != windowIndex) {
-        moveToCenter(title, mouseIndex)
-    }
-}
+XButton1:: Send("^{F19}")
 #HotIf

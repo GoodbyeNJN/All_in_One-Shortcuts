@@ -15,6 +15,20 @@
 ; Win + r 任务管理器
 #r:: Send("^+{Esc}")
 
+; Win + home/end 切换到上一个/下一个虚拟桌面
+#Home:: goToRelativeDesktopNum(-1)
+#End:: goToRelativeDesktopNum(1)
+
+; Shift + Win + home/end 移动当前窗口到上一个/下一个虚拟桌面
++#Home:: {
+    moveToRelativeDesktopNum("A", -1)
+    goToRelativeDesktopNum(-1)
+}
++#End:: {
+    moveToRelativeDesktopNum("A", 1)
+    goToRelativeDesktopNum(1)
+}
+
 ; ----------------------------------------------
 ; F13
 ; ----------------------------------------------
@@ -115,6 +129,17 @@ F14:: {
 ; F16
 ; ----------------------------------------------
 
+; 切换到指定虚拟桌面
+F16:: goToDesktopNum(1)
+
+^F16:: goToDesktopNum(2)
+
++F16:: goToDesktopNum(3)
+
+!F16:: goToDesktopNum(4)
+
+^!F16:: goToDesktopNum(5)
+
 ; ----------------------------------------------
 ; F17
 ; ----------------------------------------------
@@ -153,15 +178,56 @@ F18:: {
     }
 }
 
-; 总览所有窗口
-^!F18:: Send("#{Tab}")
+!F18::
+^!F18::
++!F18::
+{
+    if GetKeyState("Ctrl", "P") {
+        ; Ctrl + F20 调整为横向窗口
+        winSize(2160, 1620, "A")
+    } else if GetKeyState("Shift", "P") {
+        ; Shift + F20 调整为小型横向窗口
+        winSize(1920, 1440, "A")
+    } else {
+        ; 最大化/恢复当前窗口
+        local status := 1
+
+        try {
+            status := WinGetMinMax("A")
+        }
+
+        if (status == 1) {
+            WinRestore("A")
+        } else {
+            WinMaximize("A")
+        }
+    }
+}
+
+; 在所有虚拟桌面上置顶当前窗口
+>^>!F18:: VD.TogglePinWindow("A")
 
 ; ----------------------------------------------
 ; F19
 ; ----------------------------------------------
 
 ; QQ
-F19:: Send("^!{Numpad1}")
+F19:: {
+    static title := "ahk_exe QQ.exe"
+    static last := 0
+
+    if WinActive(title) {
+        Send("^!{Numpad1}")
+
+        if (WinWaitClose(title, , 1) && last != 0) {
+            WinActivate(last)
+        }
+    } else {
+        last := WinActive("A")
+
+        Send("^!{Numpad1}")
+    }
+}
 
 ; 主微信
 ^F19:: Send("^!{Numpad2}")
@@ -171,8 +237,10 @@ F19:: Send("^!{Numpad1}")
 
 ; Telegram
 !F19:: {
-    static title := "ahk_exe Telegram.exe"
-    static file := "C:\Users\cc\AppData\Roaming\Telegram Desktop\Telegram.exe"
+    ; static title := "ahk_exe Telegram.exe"
+    ; static file := "C:\Users\cc\AppData\Roaming\Telegram Desktop\Telegram.exe"
+    static title := "Unigram"
+    static file := "C:\Program Files\WindowsApps\38833FF26BA1D.UnigramPreview_11.7.0.0_x64__g9c9v27vpyspw\Telegram.exe"
 
     if WinActive(title) {
         WinClose(title)
@@ -198,32 +266,6 @@ F19:: Send("^!{Numpad1}")
 }
 
 ; ----------------------------------------------
-; F20
-; ----------------------------------------------
-
-; 最大化/恢复当前窗口
-F20:: {
-    local status := 1
-
-    try {
-        status := WinGetMinMax("A")
-    }
-
-    if (status == 1) {
-        WinRestore("A")
-    } else {
-        WinMaximize("A")
-    }
-}
-
-; Shift + F20 调整为纵向窗口
-+F20:: winSize(960, 1920 + 58, "A")
-; Ctrl + F20 调整为横向窗口
-^F20:: winSize(2160, 1620, "A")
-; Ctrl + Shift + F20 调整为小型横向窗口
-^+F20:: winSize(1920, 1440, "A")
-
-; ----------------------------------------------
 ; F24
 ; ----------------------------------------------
 *F24:: {
@@ -247,16 +289,16 @@ RButton:: {
     }
 }
 
-; 中键打开虚拟桌面管理
-MButton:: Send("#{Tab}")
+; 中键在所有虚拟桌面上置顶当前窗口
+MButton:: VD.TogglePinWindow("A")
 
 ; 切换滚动方向
 WheelUp::WheelLeft
 WheelDown::WheelRight
 
 ; PageUp/PageDown 切换虚拟桌面
-PgUp:: Send("^#{Left}")
-PgDn:: Send("^#{Right}")
+PgUp:: goToRelativeDesktopNum(-1)
+PgDn:: goToRelativeDesktopNum(1)
 
 #HotIf
 
