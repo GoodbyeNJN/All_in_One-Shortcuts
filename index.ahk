@@ -19,6 +19,7 @@ A_MaxHotkeysPerInterval := 30
 #Include <json>
 #Include <console>
 #Include <debug>
+#Include <winrt\windows>
 
 global state := {
     enableWindowChangeLog: false,

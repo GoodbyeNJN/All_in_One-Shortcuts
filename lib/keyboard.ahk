@@ -138,7 +138,7 @@ F16:: goToDesktopNum(1)
 
 !F16:: goToDesktopNum(4)
 
-^!F16:: goToDesktopNum(5)
+^+F16:: goToDesktopNum(5)
 
 ; ----------------------------------------------
 ; F17
@@ -205,7 +205,13 @@ F18:: {
 }
 
 ; 在所有虚拟桌面上置顶当前窗口
->^>!F18:: VD.TogglePinWindow("A")
+^+F18:: {
+    VD.TogglePinWindow("A")
+
+    if VD.IsWindowPinned("A") {
+        toast("已在所有桌面上固定此窗口")
+    }
+}
 
 ; ----------------------------------------------
 ; F19
@@ -252,7 +258,7 @@ F19:: {
 }
 
 ; Spark
-^!F19:: {
+^+F19:: {
     static title := "ahk_exe Spark Desktop.exe"
     static file := "C:\Users\cc\AppData\Local\Programs\SparkDesktop\Spark Desktop.exe"
 

@@ -267,6 +267,21 @@ getMousePos() {
     return { x: x, y: y }
 }
 
+toast(text) {
+    static appId := "AutoHotkey.AutoHotkey"
+    static TNM := Windows.UI.Notifications.ToastNotificationManager
+
+    TNM.History.Clear appId
+
+    local toastXml := TNM.GetTemplateContent('ToastText01')
+    toastXml.GetElementsByTagName("text").GetAt(0).InnerText := text
+
+    local notification := Windows.UI.Notifications.ToastNotification(toastXml)
+
+    local toastNotifier := TNM.CreateToastNotifier(appId)
+    toastNotifier.Show(notification)
+}
+
 class Monitor {
     static getCount() {
         return MonitorGetCount()
