@@ -15,20 +15,6 @@
 ; Win + r 任务管理器
 #r:: Send("^+{Esc}")
 
-; Win + home/end 切换到上一个/下一个虚拟桌面
-#Home:: goToRelativeDesktopNum(-1)
-#End:: goToRelativeDesktopNum(1)
-
-; Shift + Win + home/end 移动当前窗口到上一个/下一个虚拟桌面
-+#Home:: {
-    moveToRelativeDesktopNum("A", -1)
-    goToRelativeDesktopNum(-1)
-}
-+#End:: {
-    moveToRelativeDesktopNum("A", 1)
-    goToRelativeDesktopNum(1)
-}
-
 ; ----------------------------------------------
 ; F13
 ; ----------------------------------------------
@@ -102,27 +88,42 @@ F13:: {
     }
 }
 
-; ----------------------------------------------
-; F14
-; ----------------------------------------------
-
 ; 切换输入法
-F14:: {
+^F13:: {
     console.log("----------toggled----------")
     toggleIme()
 }
 
-; ----------------------------------------------
-; F15
-; ----------------------------------------------
-
 ; FlowLauncher
-~F15:: {
+~^+F13:: {
     static title := "ahk_exe Flow.Launcher.exe"
 
     if (WinWaitActive(title, , 1)) {
         toggleIme(, state.imeSwitch.off.status)
     }
+}
+
+; ----------------------------------------------
+; F14
+; ----------------------------------------------
+
+
+; ----------------------------------------------
+; F15
+; ----------------------------------------------
+
+; 切换上一个/下一个虚拟桌面
+^F15:: goToRelativeDesktopNum(-1)
+!F15:: goToRelativeDesktopNum(1)
+
+; 移动当前窗口到上一个/下一个虚拟桌面
+^+F15:: {
+    moveToRelativeDesktopNum("A", -1)
+    goToRelativeDesktopNum(-1)
+}
+!+F15:: {
+    moveToRelativeDesktopNum("A", 1)
+    goToRelativeDesktopNum(1)
 }
 
 ; ----------------------------------------------
@@ -149,11 +150,11 @@ F17:: Send("^!{F13}")
 
 ; Pot
 ; 划词翻译
-^F17:: Send("^+{F13}")
-+F17:: Send("+!{F13}")
+^F17:: Send("^+{F23}")
++F17:: Send("+!{F23}")
 
 ; Ditto
-!F17:: Send("^+!{F13}")
+!F17:: Send("^+!{F23}")
 
 ; ----------------------------------------------
 ; F18
@@ -183,10 +184,10 @@ F18:: {
 +!F18::
 {
     if GetKeyState("Ctrl", "P") {
-        ; Ctrl + F20 调整为横向窗口
+        ; Ctrl + F18 调整为横向窗口
         winSize(2160, 1620, "A")
     } else if GetKeyState("Shift", "P") {
-        ; Shift + F20 调整为小型横向窗口
+        ; Shift + F18 调整为小型横向窗口
         winSize(1920, 1440, "A")
     } else {
         ; 最大化/恢复当前窗口
@@ -274,9 +275,8 @@ F19:: {
 ; ----------------------------------------------
 ; F24
 ; ----------------------------------------------
-*F24:: {
-    Send("{F24 Up}")
-}
+
+*F24:: Send("{F24 Up}")
 
 #HotIf GetKeyState("F24", "P")
 ; 左键 浏览器内调用沉浸式划词翻译，其他应用调用Pot划词翻译
