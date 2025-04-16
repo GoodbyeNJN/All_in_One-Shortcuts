@@ -182,8 +182,12 @@ F18:: {
 !F18::
 ^!F18::
 +!F18::
+^+!F18::
 {
-    if GetKeyState("Ctrl", "P") {
+    if (GetKeyState("Ctrl", "P") && GetKeyState("Shift", "P")) {
+        ; Ctrl + Shift + F18 调整为全屏窗口
+        winSize(3840, 2076, "A")
+    } else if GetKeyState("Ctrl", "P") {
         ; Ctrl + F18 调整为横向窗口
         winSize(2160, 1620, "A")
     } else if GetKeyState("Shift", "P") {
@@ -209,9 +213,9 @@ F18:: {
 ^+F18:: {
     VD.TogglePinWindow("A")
 
-    if VD.IsWindowPinned("A") {
-        toast("已在所有桌面上固定此窗口")
-    }
+    ; if VD.IsWindowPinned("A") {
+    ;     toast("已在所有桌面上固定此窗口")
+    ; }
 }
 
 ; ----------------------------------------------
@@ -244,10 +248,10 @@ F19:: {
 
 ; Telegram
 !F19:: {
-    ; static title := "ahk_exe Telegram.exe"
-    ; static file := "C:\Users\cc\AppData\Roaming\Telegram Desktop\Telegram.exe"
-    static title := "Unigram"
-    static file := "C:\Program Files\WindowsApps\38833FF26BA1D.UnigramPreview_11.7.0.0_x64__g9c9v27vpyspw\Telegram.exe"
+    static title := "ahk_exe Telegram.exe"
+    static file := "C:\Users\cc\AppData\Roaming\Telegram Desktop\Telegram.exe"
+    ; static title := "Unigram"
+    ; static file := "C:\Program Files\WindowsApps\38833FF26BA1D.UnigramPreview_11.7.0.0_x64__g9c9v27vpyspw\Telegram.exe"
 
     if WinActive(title) {
         WinClose(title)
@@ -281,8 +285,8 @@ F19:: {
 #HotIf GetKeyState("F24", "P")
 ; 左键 浏览器内调用沉浸式划词翻译，其他应用调用Pot划词翻译
 LButton:: {
-    if WinActive("ahk_exe chrome.exe") {
-        Send("!z")
+    if (WinActive("ahk_exe chrome.exe") || WinActive("ahk_exe firefox.exe")) {
+        Send("+!z")
     } else {
         Send("^{F17}")
     }
@@ -290,8 +294,8 @@ LButton:: {
 
 ; 右键 浏览器内调用沉浸式全页翻译
 RButton:: {
-    if WinActive("ahk_exe chrome.exe") {
-        Send("!a")
+    if (WinActive("ahk_exe chrome.exe") || WinActive("ahk_exe firefox.exe")) {
+        Send("+!a")
     }
 }
 

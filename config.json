@@ -75,12 +75,6 @@
      {
       "onActivated": 1,
       "onCreated": 1,
-      "processName": "firefox.exe",
-      "status": 0
-     },
-     {
-      "onActivated": 1,
-      "onCreated": 1,
       "processName": "acad.exe",
       "status": 0
      },
