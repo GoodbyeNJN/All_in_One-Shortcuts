@@ -20,7 +20,7 @@
 ; ----------------------------------------------
 
 ; Terminal
-F13:: {
+^F13:: {
     ; if ProcessExist("WindowsTerminal.exe") {
     ;     Send("#``")
     ; } else {
@@ -89,7 +89,7 @@ F13:: {
 }
 
 ; 切换输入法
-^F13:: {
+F13:: {
     console.log("----------toggled----------")
     toggleIme()
 }
