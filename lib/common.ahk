@@ -22,21 +22,21 @@ initState() {
     state.password := readEnv("password")
 }
 
-readEnv(key := unset) {
+readEnv(key?) {
     local string := FileRead(ENV_FILE_PATH)
     local env := JsonParse(string)
 
     return IsSet(key) ? env.%key% : env
 }
 
-readConfig(key := unset) {
+readConfig(key?) {
     local string := FileRead(CONFIG_FILE_PATH)
     local config := JsonParse(string)
 
     return IsSet(key) ? config.%key% : config
 }
 
-writeConfig(value, key := unset) {
+writeConfig(value, key?) {
     local config := {}
 
     if (IsSet(key)) {
@@ -115,7 +115,7 @@ getParamsString(params) {
     return str
 }
 
-getCommandLineString(args := unset) {
+getCommandLineString(args?) {
     if (!IsSet(args)) {
         args := {}
     }
@@ -146,10 +146,27 @@ getCurrentExplorerPath() {
     }
 }
 
-winSize(w, h, params*) {
+winMoveReal(x?, y?, w?, h?, params*) {
     local rect := getWindowRect(params*)
+    local real := getWindowRealRect(params*)
 
-    WinMove(rect.x, rect.y, w, h, params*)
+    local xShadowW := real.x - rect.x
+    local yShadowH := (rect.h - real.h) / 2
+
+    local newX := IsSet(x) && x - (xShadowW + 1)
+    local newY := IsSet(y) && y - 1
+    local newW := IsSet(w) && w + (xShadowW + 1) * 2
+    local newH := IsSet(h) && h + (yShadowH + 1) * 2
+
+    WinMove(newX, newY, newW, newH, params*)
+}
+
+winSize(w?, h?, params*) {
+    WinMove(, , w, h, params*)
+}
+
+winSizeReal(w?, h?, params*) {
+    winMoveReal(, , w, h, params*)
 }
 
 goToDesktopNum(num) {
@@ -170,7 +187,7 @@ goToRelativeDesktopNum(num) {
     }
 }
 
-moveToDesktopNum(title := "A", num := unset) {
+moveToDesktopNum(title := "A", num?) {
     if (!IsSet(num) || num < 1 || num > VD.getCount() || num == VD.getDesktopNumOfWindow(title)) {
         return
     }
@@ -178,7 +195,7 @@ moveToDesktopNum(title := "A", num := unset) {
     VD.MoveWindowToDesktopNum(title, num)
 }
 
-moveToRelativeDesktopNum(title := "A", num := unset) {
+moveToRelativeDesktopNum(title := "A", num?) {
     local current := VD.getDesktopNumOfWindow(title)
 
     if (num < 0) {
@@ -188,7 +205,7 @@ moveToRelativeDesktopNum(title := "A", num := unset) {
     }
 }
 
-moveToCenter(title := "A", monitorIndex := unset) {
+moveToCenter(title := "A", monitorIndex?) {
     local status := 1
 
     try {
@@ -208,7 +225,7 @@ moveToCenter(title := "A", monitorIndex := unset) {
     WinMove(x, y, , , title)
 }
 
-moveQuakeModeWindow(title := "A", w := unset, h := unset, monitorIndex := unset) {
+moveQuakeModeWindow(title := "A", w?, h?, monitorIndex?) {
     try {
         DetectHiddenWindows(true)
 
@@ -256,6 +273,41 @@ getWindowRect(title := "A") {
     }
 
     return { x: x, y: y, w: w, h: h }
+}
+
+getWindowRealRect(title := "A") {
+    local x := 0
+    local y := 0
+    local w := 0
+    local h := 0
+
+    local rect := Buffer(16, 0)
+    try {
+        DllCall("dwmapi\DwmGetWindowAttribute",
+            "Ptr", WinExist(title),
+            "UInt", DWMWA_EXTENDED_FRAME_BOUNDS,
+            "Ptr", rect,
+            "UInt", rect.size,
+            "UInt")
+        x := NumGet(rect, 0, "Int") - x
+        y := NumGet(rect, 4, "Int") - y
+        w := NumGet(rect, 8, "Int") - x
+        h := NumGet(rect, 12, "Int") - y
+    } catch {
+        return { x: x, y: y, w: w, h: h }
+    }
+
+    return { x: x, y: y, w: w, h: h }
+}
+
+getWindowShadowDimension(title := "A") {
+    local rect := getWindowRect(title)
+    local real := getWindowRealRect(title)
+
+    local w := real.x - rect.x
+    local h := (rect.h - real.h) / 2
+
+    return { w: w, h: h }
 }
 
 getMousePos() {

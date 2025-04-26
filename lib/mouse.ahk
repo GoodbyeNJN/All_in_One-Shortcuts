@@ -1,5 +1,5 @@
 ; 判断当前鼠标是否在当前屏幕的边缘
-isMouseAtEdges(edges := unset) {
+isMouseAtEdges(edges?) {
     if (!IsSet(edges)) {
         edges := []
     }

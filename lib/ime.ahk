@@ -139,7 +139,7 @@ setImeSwitch(imeSwitch, hwnd) {
     }
 }
 
-toggleIme(lParam := 0, status := unset) {
+toggleIme(lParam := 0, status?) {
     local hwnd := getHwnd(lParam)
     if (!hwnd) {
         return

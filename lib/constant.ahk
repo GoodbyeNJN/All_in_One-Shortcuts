@@ -5,6 +5,8 @@ global IME_OFF_ICON := "resource\en.ico"
 
 global PI := 4 * ATan(1)
 
+global DWMWA_EXTENDED_FRAME_BOUNDS := 9
+
 ; https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-inputlangchangerequest
 global WM_INPUTLANGCHANGEREQUEST := 0x50
 
